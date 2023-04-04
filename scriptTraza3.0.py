@@ -5,8 +5,8 @@ with open('traza.txt', 'r') as archivo_entrada:
 
 lineas_salida = []
 lineashttp = []
-result = {}
-errores = []
+result = {"errores" : []}
+
 
                 
         
@@ -18,19 +18,19 @@ for i, linea in enumerate(lineas_entrada):
                 error_linea = 415
                 trace_line = lineas_entrada[j]
                 hayError_flag = True
-                #Para añadir al JSON
+
                 error = {
                     "errorCode" : error_linea,
                     "errorLine" : trace_line
                 }
-                errores.append(error) 
+                result["errores"].append(error) 
                 break
         if not hayError_flag:
             error = {
                 "errorCode" : error_linea,
                 "errorLine" : "Error especifico"
             }
-            errores.append(error) 
+            result["errores"].append(error) 
         
 
                
@@ -45,32 +45,32 @@ for i, linea in enumerate(lineas_entrada):
                     "errorCode" : error_linea,
                     "errorLine" : trace_line
                 }
-                errores.append(error) 
+                result["errores"].append(error) 
                 break
         if not hayError_flag:
             error = {
                 "errorCode" : error_linea,
                 "errorLine" : "Error especifico"
             }
-            errores.append(error) 
+            result["errores"].append(error) 
                 
-        break
+        
     elif "NAME 'Code' VALUE 'GSS-400" in linea:
-        for j in range(max(0, i - 20), i):
-            if "The result was" in lineas_entrada[j]:
+            if "The result was" in lineas_entrada[i-3]:
                 error_linea = 400
-                error_index = lineas_entrada[j].find("Value=NULL")
-                linea_salida = error_linea + "\t\t| " + lineas_entrada[j][error_index:]
-                result_index2 = linea_salida.find("at (\'")
-                linea_salida = linea_salida[:result_index2]
-                lineas_salida.append(linea_salida)
-                 #Para añadir al JSON
+                trace_line = lineas_entrada[i-3]
                 error = {
                     "errorCode" : error_linea,
-                    "errorLine" : lineas_entrada[j]
+                    "errorLine" : trace_line
                 }
-                errores.append(error)
-                break
+                result["errores"].append(error)
+            else:
+                error = {
+                    "errorCode" : 400,
+                    "errorLine" : "No encontrado. Error especifico."
+                }
+                result["errores"].append(error)
+    
 
     elif "This resolved to ''mandatoryCoreId''. The result was" in linea:
         mandatoryCoreId = (lineas_entrada[i]) 
@@ -104,7 +104,7 @@ for i, linea in enumerate(lineas_entrada):
         apiName = apiName[indexApi:-5]
 
 
-print(errores)
+print(result)
 
 with open('archivo_salida.txt', 'w') as archivo_salida:
     archivo_salida.write('--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n')
